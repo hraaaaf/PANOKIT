@@ -1,47 +1,55 @@
-# PANOKIT — ROADMAP (miroir de lecture GitHub)
+# PANOKIT — Roadmap en 16 jalons (miroir GitHub)
 
-> **IMPORTANT — SOURCE CANONIQUE UNIQUE** : [🧭 Roadmap Notion PANOKIT](https://app.notion.com/p/41777c6633628195b96cdc442fae78ec). Les décisions et leurs checkboxes sont **mises à jour d'abord dans Notion**. Ce fichier est une synthèse pour GitHub et les sources du projet. S'il y a divergence, **Notion prévaut**. Ne pas créer une deuxième roadmap maîtresse.
+> **SOURCE DE VÉRITÉ UNIQUE :** [🧭 Roadmap Notion PANOKIT](https://app.notion.com/p/41777c6633628195b96cdc442fae78ec). Ce fichier n'est qu'un résumé versionné pour les contributeurs et les Sources du projet. **En cas de divergence, Notion prévaut.** Les décisions et validations humaines se consignent d'abord dans Notion.
 
-**Point d'arrêt : 13/11/2026.**
+**Découpage J00–J15 validé explicitement le 13 novembre 2026.** Le MVP de référence est une **commande complète de caisson lumineux rectangulaire en kit** : catalogue standard → Studio → devis/prix → commande invitée → BAT → fabrication. Les six familles sont visibles dès l'accueil, mais toutes ne sont pas encore commercialisables.
 
-## Jalons de cadrage
+## Tableau des jalons
 
-- [x] **J01 — Identité / accueil** : direction premium orange/blanc/noir, illustration architecturale, 6 catégories. Maquette cible statique provisoire.
-- [ ] **J02 — Catalogue industriel** : six familles établies ; quatre enseignes lumineuses et standardisation validées ; formats exacts, kits, composants, coûts et capacités de l'usine partenaire à confirmer.
-- [x] **J03 — Métier** : listes V1 profession libérale / commerce et « Autre à préciser ».
-- [x] **J04 — Studio pilote caisson** : parcours, 4 templates, aperçu à plat et façade Jour/Nuit, FR/AR, assistant déterministe, contrôles logo ; **spécification validée, pas logiciel livré**.
-- [x] **J05 — Prix / livraison** : prix TTC immédiat et modifiable par l'admin ; transport facultatif par zones ou kilomètres, plusieurs dépôts ; **livraison hors zone sur demande supprimée**.
-- [x] **J06 — Commande / BAT** : checkout invité, accord visuel, contrôle technique avant fabrication, BAT révisé si changement visible ; WhatsApp consentement + SMS OTP.
-- [ ] **J07 — Back-office / exploitation** : droits, audit complet des commandes web, production, rapprochement financier, documents et support à spécifier.
-- [x] **J08 — Choix de stack** : Next.js/React, Tailwind CSS v4, shadcn/ui, Lucide, NestJS/TypeScript, Drizzle, Supabase PostgreSQL/Storage/Auth ; monorepo pnpm ; Vercel **DEV uniquement en cible**, sans autorisation de déployer ; PROD à définir.
-- [ ] **J09 — Développement et preuves** : initialisation du dépôt public/CI en cours ; aucun prototype métier démontré ni déployé.
+**Légende :** `[x]` = jalon clos avec preuve ; `[ ]` = jalon incomplet, même si des spécifications sont validées.
 
-## Règles stratégiques non négociables
+### Phase A — Fondations et gouvernance
 
-- [x] **« IKEA des panneaux »** : produits/kits standardisés, avec personnalisation de contenu et non dimensions arbitraires.
-- [x] **Usine du cofondateur industriel**, et non propriété exclusive du cofondateur du canal digital.
-- [x] **Droits économiques du cofondateur digital limités aux commandes issues du site** ; registre PANOKIT indépendant et contrôlable, provenance, audit, reporting de rapprochement.
-- [x] **B2B et B2C** ; revendeurs prioritaires au lancement mais site ouvert aux clients directs.
-- [x] **Tarif V1 identique** revendeur/client direct ; pose optionnelle, hors prix standard et étudiée séparément.
-- [x] **Pas de déploiement Vercel sans GO explicite**, y compris DEV. Aucune décision PROD prise.
+- [x] **J00 — Vision, gouvernance et documentation.** Modèle « IKEA des panneaux », architecture ciblée et six fichiers Markdown disponibles ; Notion est la roadmap canonique. **Statut : cadrage initial terminé.**
+- [ ] **J01 — Monorepo, CI et reproductibilité.** Next.js, NestJS, contrats partagés, GitHub Actions, lockfile pnpm figé, contrôles et revue humaine. **Statut : en cours**. [PR #1](https://github.com/hraaaaf/PANOKIT/pull/1).
 
-## Prochaines tâches d'exécution
+### Phase B — Vitrine et catalogue
 
-- [ ] **P0 — Repository** : créer arborescence monorepo, configuration pnpm, applications Next.js/NestJS et contrats.
-- [ ] **P0 — CI** : GitHub Actions typecheck, lint, tests, builds ; verrouiller le lockfile, valider les jobs avec liens de preuve.
-- [ ] **P0 — Contrôle commercial** : schéma PostgreSQL des commandes, identifiant et provenance web, droits commerciaux vs usine, historique append-only et exports.
-- [ ] **P0 — Atelier usine / kits** : nomenclature et packaging du caisson, format export, temps/coûts, qualité, politique d'installation.
-- [ ] **P0 — Prototype Studio** : SVG caisson, composants FR/AR/bilingues, versions du BAT, sécurité des logos, démonstration mobile/desktop.
-- [ ] **P0 — Checkout** : paiement/facturation Maroc, calcul TTC, livraison avant paiement, droits et validation BAT.
-- [ ] **P0 — DEV** : obtenir GO distinct avant tout déploiement Vercel, vérifier API serverless ; **PROD différée**.
-- [ ] **P1 — Extensions** : autres modèles de panneaux, catégorie Habillage de façade et règles propres.
+- [ ] **J02 — Design system et accueil.** Reproduire fidèlement le dernier mockup validé : six illustrations premium, grille 3×2, interactions desktop/mobile, accessibilité, comparaison avant/après. **Statut : en cours** ; [PR #2](https://github.com/hraaaaf/PANOKIT/pull/2).
+- [ ] **J03 — Catalogue et standardisation industrielle.** Familles, quatre enseignes lumineuses, caisson pilote, formats et composants réels confirmés par l'usine.
 
-## GOAL / SUCCESS / PROOF
+### Phase C — Commerce et personnalisation
 
-**GOAL :** démontrer une première commande caisson lumineux standard, du catalogue jusqu'à un dossier atelier traçable.
+- [ ] **J04 — Base de données, rôles et provenance des commandes.** Supabase PostgreSQL/Drizzle, audit, identité `PANOKIT_WEB`, séparation PANOKIT/usine, tests de fraude.
+- [ ] **J05 — PANOKIT Studio SVG-first.** Quatre templates, vue à plat/façade Jour-Nuit, FR/AR, logo contrôlé, moteur de personnalisation guidé.
+- [ ] **J06 — Prix, devis et livraison.** Prix TTC serveur et modifiable par admin, options, livraison zone/distance, installation séparée.
+- [ ] **J07 — Commande invitée et paiement.** Nom/téléphone, consentement visuel, transaction fiable, prestataire Maroc à choisir.
+- [ ] **J08 — BAT et validation.** Contrôle atelier, versions, OTP SMS, refus/expiration, accord explicite en cas de modification visible.
 
-**SUCCESS :** le client conçoit, voit son prix, valide et commande ; PANOKIT garde la preuve d'origine et de ses droits ; l'usine ne reçoit que l'ordre pertinent.
+### Phase D — Exploitation et ateliers
 
-**PROOF attendue (aucune preuve de fonctionnement métier à ce jour) :** lien PR/commit, CI verte, captures avant/après, tests droits et tarifs, parcours E2E et export de fabrication, revue humaine avant merge.
+- [ ] **J09 — Dossier atelier et fabrication.** Export industriel, composants de kit, fichiers privés, transmission au partenaire, test réel.
+- [ ] **J10 — Back-office et rapprochement du canal web.** Droits distincts, reporting ventes PANOKIT, audit financier indépendant.
+- [ ] **J11 — Notifications et suivi.** WhatsApp avec consentement, SMS de secours, suivi commande, assistant déterministe FR/AR.
 
-**Synchronisation :** à chaque décision matérialisée, consigner le résultat et ses preuves dans la page Notion canonique, puis mettre à jour ce miroir Markdown lors des checkpoints Git.
+### Phase E — Qualité et lancement
+
+- [ ] **J12 — Sécurité et résilience.** Protection des données, contrôle des accès, imports de fichiers, sauvegardes, contraintes serverless.
+- [ ] **J13 — Tests E2E, qualité visuelle et accessibilité.** Scénarios du caisson jusqu'à l'usine, preuves, captures, revue.
+- [ ] **J14 — Démonstration Vercel DEV.** Deux applications séparées. **Jamais de déploiement sans GO explicite**, même DEV.
+- [ ] **J15 — Choix PROD et lancement.** Hébergement de production non décidé ; plan de lancement pilote, GO distinct requis.
+
+## Garde-fous
+
+- Chaque jalon exige **GOAL / SUCCESS / PROOF**, résultats CI et revue humaine avant clôture.
+- **Le fait d'avoir validé les spécifications pendant l'onboarding ne signifie pas que les fonctionnalités sont codées.**
+- Respecter les règles commerciales : droits du cofondateur digital limités aux **commandes issues du site PANOKIT**, registre vérifiable distinct des autres commandes usine.
+- Dépôt GitHub **public par choix de l'utilisateur** : aucun secret, fichier client, logo réel ou BAT sensible ne doit y être ajouté.
+- **Aucun merge automatique, aucun déploiement Vercel sans autorisation explicite.** PROD à décider plus tard.
+- Les captures avant/après sont requises pour les livraisons visuelles.
+
+## Prochaine action
+
+**J01 d'abord**, avec lockfile pnpm, installation `--frozen-lockfile`, CI verte sur la tête de PR #1 et revue humaine ; **J02** ensuite pour intégrer les véritables assets du mockup dans la PR #2. La source Notion est prioritaire lors de tout avancement.
+
+**Ne pas créer une deuxième roadmap canonique dans GitHub ou dans un autre document.**
