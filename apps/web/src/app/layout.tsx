@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PANOKIT — Initialisation technique",
-  description: "Prototype technique de la plateforme PANOKIT.",
+  title: "PANOKIT | Enseignes et signalétique en kit",
+  description: "Découvrez les enseignes, drapeaux, signalétiques et supports de communication PANOKIT : une sélection de solutions en kit à personnaliser.",
 };
 
 export default function RootLayout({
