@@ -263,7 +263,7 @@ export default function HomePage() {
 
       <section className="home-hero" aria-labelledby="home-title">
         <p className="eyebrow"><span className="eyebrow-line" /> SIGNALÉTIQUE &amp; COMMUNICATION VISUELLE</p>
-        <h1 id="home-title">Avoir son enseigne n&apos;a jamais<br className="headline-break" /> <strong>été aussi simple.</strong></h1>
+        <h1 id="home-title">Avoir son enseigne n&apos;a<span className="mobile-headline-break"><br /></span> jamais<br className="headline-break" /> <strong>été aussi simple.</strong></h1>
         <div className="headline-stroke" aria-hidden="true" />
       </section>
 
