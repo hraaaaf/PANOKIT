@@ -1,9 +1,9 @@
 name: J02 Visual proof (no deploy)
 
 on:
-  push:
+  pull_request:
     branches:
-      - feat/lot01-accueil
+      - main
   workflow_dispatch:
 
 permissions:
