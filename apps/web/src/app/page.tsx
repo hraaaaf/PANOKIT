@@ -13,7 +13,7 @@ import {
   Store,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type FamilyId =
   | "enseignes"
@@ -200,8 +200,20 @@ function CategoryScene({ family }: { family: FamilyId }) {
 }
 
 export default function HomePage() {
-  const [expanded, setExpanded] = useState<FamilyId | null>("enseignes");
+  const [expanded, setExpanded] = useState<FamilyId | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [artReady, setArtReady] = useState(false);
+
+  useEffect(() => {
+    const artwork = new window.Image();
+    artwork.onload = () => setArtReady(true);
+    artwork.onerror = () => setArtReady(false);
+    artwork.src = "/images/panokit-cards.webp";
+    return () => {
+      artwork.onload = null;
+      artwork.onerror = null;
+    };
+  }, []);
 
   return (
     <main className="panokit-home">
@@ -263,11 +275,23 @@ export default function HomePage() {
             return (
               <article
                 key={family.id}
-                className={`category-card ${isExpanded ? "selected" : ""}`}
-                onMouseEnter={() => setExpanded(family.id)}
+                className={`category-card ${family.id === "enseignes" ? "reference-emphasis" : ""} ${isExpanded ? "selected" : ""}`}
+                onMouseEnter={() => {
+                  if (window.matchMedia("(hover: hover)").matches) setExpanded(family.id);
+                }}
+                onMouseLeave={() => {
+                  if (window.matchMedia("(hover: hover)").matches) {
+                    setExpanded((open) => (open === family.id ? null : open));
+                  }
+                }}
               >
-                <div className="card-artwork">
-                  <CategoryScene family={family.id} />
+                <div
+                  className={`card-artwork ${artReady ? "has-photo" : ""}`}
+                  data-family={family.id}
+                  role="img"
+                  aria-label={`Illustration de ${family.name.toLowerCase()} issue de la maquette PANOKIT`}
+                >
+                  {!artReady && <CategoryScene family={family.id} />}
                 </div>
                 <button
                   type="button"
@@ -295,7 +319,7 @@ export default function HomePage() {
             );
           })}
         </div>
-        <p className="art-note">Illustrations de structure provisoires : les six visuels définitifs seront intégrés depuis la maquette validée.</p>
+        <p className="art-note">Illustrations extraites du mockup de référence ; contrôle des visuels haute définition avant commercialisation.</p>
       </section>
 
       <section className="home-secondary" id="comment-ca-marche">
