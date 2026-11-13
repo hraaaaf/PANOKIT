@@ -1,32 +1,21 @@
 "use client";
 
 import {
+  ArrowDown,
   ArrowRight,
   ChevronDown,
   FileText,
-  Flag,
-  Layers3,
   Menu,
-  PanelsTopLeft,
-  Printer,
-  SignpostBig,
-  Store,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FamilyIcon, type PanokitFamilyId } from "../components/family-icon";
 
-type FamilyId =
-  | "enseignes"
-  | "drapeaux"
-  | "signaletique"
-  | "plv"
-  | "impression"
-  | "habillage";
+type FamilyId = PanokitFamilyId;
 
 type Family = {
   id: FamilyId;
   name: string;
-  icon: typeof Store;
   options: string[];
 };
 
@@ -34,37 +23,31 @@ const families: Family[] = [
   {
     id: "enseignes",
     name: "Enseignes",
-    icon: Store,
     options: ["Lumineuses", "Non lumineuses"],
   },
   {
     id: "drapeaux",
     name: "Drapeaux",
-    icon: Flag,
     options: ["Lumineux", "Non lumineux"],
   },
   {
     id: "signaletique",
     name: "Signalétique",
-    icon: SignpostBig,
     options: ["Plaques", "Totems", "Chantier"],
   },
   {
     id: "plv",
     name: "PLV",
-    icon: PanelsTopLeft,
     options: ["Supports de communication"],
   },
   {
     id: "impression",
     name: "Impression",
-    icon: Printer,
     options: ["Vinyle", "Bâche", "Tissu"],
   },
   {
     id: "habillage",
     name: "Habillage de façade",
-    icon: Layers3,
     options: ["Plein", "Perforé"],
   },
 ];
@@ -265,12 +248,14 @@ export default function HomePage() {
         <p className="eyebrow"><span className="eyebrow-line" /> SIGNALÉTIQUE &amp; COMMUNICATION VISUELLE</p>
         <h1 id="home-title">Avoir son enseigne n&apos;a<span className="mobile-headline-break"><br /></span> jamais<br className="headline-break" /> <strong>été aussi simple.</strong></h1>
         <div className="headline-stroke" aria-hidden="true" />
+        <a className="mobile-hero-action" href="#familles">
+          Voir les produits <ArrowDown size={17} aria-hidden="true" />
+        </a>
       </section>
 
       <section className="category-section" id="familles" aria-label="Nos familles de produits">
         <div className="category-grid">
           {families.map((family) => {
-            const Icon = family.icon;
             const isExpanded = expanded === family.id;
             return (
               <article
@@ -300,7 +285,7 @@ export default function HomePage() {
                   aria-controls={`family-${family.id}-options`}
                   onClick={() => setExpanded(isExpanded ? null : family.id)}
                 >
-                  <Icon size={30} strokeWidth={1.8} aria-hidden="true" />
+                  <FamilyIcon family={family.id} />
                   <span>{family.name}</span>
                   <span className="category-chevron" aria-hidden="true"><ChevronDown size={21} /></span>
                 </button>
