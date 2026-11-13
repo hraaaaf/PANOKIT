@@ -1,0 +1,43 @@
+name: PANOKIT — one-time lockfile bootstrap
+
+on:
+  push:
+    branches:
+      - feat/bootstrap-monorepo-ci
+
+permissions:
+  contents: write
+
+jobs:
+  lockfile-once:
+    name: Generate and commit pnpm-lock.yaml once
+    if: github.actor == 'hraaaaf'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "10.22.0"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Create lockfile without running dependency scripts
+        shell: bash
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            echo "Lockfile already exists; nothing to do."
+            exit 0
+          fi
+          pnpm install --lockfile-only --ignore-scripts --no-frozen-lockfile
+          test -s pnpm-lock.yaml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml
+          git commit -m "chore(deps): pin pnpm dependency resolution for reproducible CI"
+          git push origin HEAD:feat/bootstrap-monorepo-ci
+
+# TEMPORARY bootstrap workflow. Remove after lockfile generation.
+# Never used for Vercel deployments; only runs on the bootstrap branch.
