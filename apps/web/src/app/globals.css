@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* Valeurs de marque définitives à valider via la roadmap Notion. */
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: #111;
+  font-family: Arial, Helvetica, sans-serif;
+}
