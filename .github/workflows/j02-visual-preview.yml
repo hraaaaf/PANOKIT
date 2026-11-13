@@ -1,0 +1,64 @@
+name: J02 Visual proof (no deploy)
+
+on:
+  push:
+    branches:
+      - feat/lot01-accueil
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: j02-visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    name: Build and capture responsive screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "10.22.0"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Next.js
+        run: pnpm --filter @panokit/web build
+      - name: Start local preview and verify source artwork
+        shell: bash
+        run: |
+          pnpm --filter @panokit/web exec next start -p 3000 > /tmp/panokit-next.log 2>&1 &
+          ok=0
+          for n in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:3000/ > /dev/null; then ok=1; break; fi
+            sleep 1
+          done
+          test "$ok" -eq 1 || { cat /tmp/panokit-next.log; exit 1; }
+          curl -fsS http://127.0.0.1:3000/images/panokit-cards.webp -o /tmp/panokit-cards.webp
+          test "$(wc -c < /tmp/panokit-cards.webp)" -gt 50000
+          curl -fsS 'http://127.0.0.1:3000/catalogue/enseignes?categorie=lumineuses' > /dev/null
+      - name: Install Playwright Chromium
+        run: npx -y playwright@1.56.1 install --with-deps chromium
+      - name: Capture actual Next.js desktop and mobile views
+        shell: bash
+        run: |
+          mkdir -p proof
+          npx -y playwright@1.56.1 screenshot --browser chromium --viewport-size "1440,1100" --wait-for-timeout 1500 --full-page http://127.0.0.1:3000/ proof/accueil-desktop-1440.png
+          npx -y playwright@1.56.1 screenshot --browser chromium --viewport-size "768,1024" --wait-for-timeout 1500 --full-page http://127.0.0.1:3000/ proof/accueil-tablet-768.png
+          npx -y playwright@1.56.1 screenshot --browser chromium --viewport-size "390,844" --wait-for-timeout 1500 --full-page http://127.0.0.1:3000/ proof/accueil-mobile-390.png
+      - name: Upload visual proof, not deploy
+        uses: actions/upload-artifact@v4
+        with:
+          name: panokit-j02-visual-proof
+          path: proof/*.png
+          retention-days: 14
+          if-no-files-found: error
+
+# This runs a local server only on GitHub Actions to capture evidence.
+# It does NOT publish to Vercel or any public hosting environment.
