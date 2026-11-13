@@ -9,6 +9,14 @@ try {
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   await desktop.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
   assert.equal(await desktop.locator(".category-card").count(), 6, "Six category cards required");
+  assert.equal(await desktop.locator(".panokit-family-icon").count(), 6, "Six custom mockup pictograms are required");
+  assert.equal(await desktop.locator(".mobile-hero-action").isVisible(), false, "Mobile CTA must remain hidden on desktop");
+  const expectedFamilies = ["enseignes", "drapeaux", "signaletique", "plv", "impression", "habillage"];
+  assert.deepEqual(
+    await desktop.locator("[data-family-icon]").evaluateAll((elements) => elements.map((element) => element.getAttribute("data-family-icon"))),
+    expectedFamilies,
+    "Every category must have the matching custom mockup pictogram",
+  );
   assert.match(await desktop.title(), /^PANOKIT \| Enseignes et signalétique en kit$/, "Published preview must not retain bootstrap metadata");
 
   await desktop.locator(".card-artwork.has-photo").first().waitFor({ timeout: 8000 });
@@ -42,6 +50,14 @@ try {
   });
   await mobile.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
   assert.equal(await mobile.locator(".category-card").count(), 6, "Mobile shows all six cards");
+  const mobileCTA = mobile.locator(".mobile-hero-action");
+  assert.equal(await mobileCTA.isVisible(), true, "Mobile entry CTA must be visible");
+  assert.equal(await mobileCTA.getAttribute("href"), "#familles", "CTA must point to the real product choices, not an unfinished quote form");
+  assert.equal((await mobileCTA.textContent())?.trim().replace(/\\s+/g, " "), "Voir les produits");
+  await mobileCTA.tap();
+  await mobile.waitForFunction(() => window.location.hash === "#familles");
+  const familySection = await mobile.locator("#familles").boundingBox();
+  assert.ok(familySection && familySection.y < 845, "Tapping CTA should bring product choices into view");
 
   const mobileFirst = mobile.locator(".category-card").first().locator(".category-title-row");
   assert.equal(await mobileFirst.getAttribute("aria-expanded"), "false");
@@ -98,6 +114,13 @@ try {
   }
 
   await desktop.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
+  const mobileCTAColors = await mobileCTA.evaluate((element) => ({
+    fg: getComputedStyle(element).color,
+    bg: getComputedStyle(element).backgroundColor,
+    height: element.getBoundingClientRect().height,
+  }));
+  assert.ok(mobileCTAColors.height >= 44, "Mobile CTA tap target must be at least 44px high");
+
   const colorData = await desktop.evaluate(() => {
     const cta = document.querySelector(".primary-action");
     const kicker = document.querySelector(".section-kicker");
@@ -125,6 +148,7 @@ try {
   };
   assert.ok(contrast(colorData.ctaFg, colorData.ctaBg) >= 4.5, "Quote CTA must meet AA text contrast");
   assert.ok(contrast(colorData.kickerFg, colorData.kickerBg) >= 4.5, "Small orange kicker must meet AA text contrast");
+  assert.ok(contrast(mobileCTAColors.fg, mobileCTAColors.bg) >= 4.5, "Mobile product CTA must meet AA text contrast");
 
   console.log("J02 checks passed: images, hover, keyboard, touch, two-line tagline, horizontal overflow, document metadata, CTA/label color contrast.");
 } finally {
