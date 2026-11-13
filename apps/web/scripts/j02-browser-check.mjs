@@ -53,7 +53,7 @@ try {
   const mobileCTA = mobile.locator(".mobile-hero-action");
   assert.equal(await mobileCTA.isVisible(), true, "Mobile entry CTA must be visible");
   assert.equal(await mobileCTA.getAttribute("href"), "#familles", "CTA must point to the real product choices, not an unfinished quote form");
-  assert.equal((await mobileCTA.textContent())?.trim().replace(/\\s+/g, " "), "Voir les produits");
+  assert.equal((await mobileCTA.textContent())?.trim().replace(/\s+/g, " "), "Voir les produits");
   await mobileCTA.tap();
   await mobile.waitForFunction(() => window.location.hash === "#familles");
   const familySection = await mobile.locator("#familles").boundingBox();
