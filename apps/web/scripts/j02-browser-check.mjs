@@ -54,7 +54,41 @@ try {
   assert.equal(await menuToggle.getAttribute("aria-expanded"), "true", "Mobile menu opens");
   assert.equal(await mobile.locator(".mobile-nav a").count(), 5, "Mobile menu has five links");
 
-  console.log("J02 browser checks passed: artwork, six cards, desktop hover, keyboard, route and mobile tap/menu.");
+  // Regression: approved tagline must occupy exactly two lines on mobile.
+  // In particular, "simple." must not be orphaned on a third line.
+  for (const width of [280, 300, 320, 360, 375, 390, 414, 430, 600]) {
+    const narrowPage = await browser.newPage({
+      viewport: { width, height: 844 },
+      isMobile: true,
+      hasTouch: true,
+    });
+    await narrowPage.goto("http://127.0.0.1:3000/", { waitUntil: "domcontentloaded" });
+    const heading = narrowPage.locator("#home-title");
+    const measurement = await heading.evaluate((element) => {
+      const style = getComputedStyle(element);
+      const lineHeight = Number.parseFloat(style.lineHeight);
+      const rect = element.getBoundingClientRect();
+      return {
+        lines: Math.round(rect.height / lineHeight),
+        text: (element.textContent ?? "").replace(/\\s+/g, " ").trim(),
+        viewport: document.documentElement.clientWidth,
+        elementWidth: rect.width,
+      };
+    });
+    assert.equal(measurement.lines, 2, `Tagline must occupy exactly two lines at ${width}px`);
+    assert.equal(
+      measurement.text,
+      "Avoir son enseigne n'a jamais été aussi simple.",
+      "Approved tagline wording must not change",
+    );
+    assert.ok(
+      measurement.elementWidth <= measurement.viewport + 1,
+      `Tagline container should not overflow at ${width}px`,
+    );
+    await narrowPage.close();
+  }
+
+  console.log("J02 browser checks passed: artwork, six cards, hover, keyboard, mobile touch/menu and two-line tagline at 9 widths.");
 } finally {
   await browser.close();
 }
