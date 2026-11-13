@@ -110,7 +110,7 @@ try {
     };
   });
   const luminance = (rgb) => {
-    const rgbArray = rgb.match(/\\d+(?:\\.\\d+)?/g)?.slice(0, 3).map(Number);
+    const rgbArray = rgb.match(/\d+(?:\.\d+)?/g)?.slice(0, 3).map(Number);
     if (!rgbArray || rgbArray.length !== 3) throw new Error(`Unexpected CSS color: ${rgb}`);
     const linear = rgbArray.map(v => {
       const c = v / 255;
