@@ -70,7 +70,7 @@ try {
       const rect = element.getBoundingClientRect();
       return {
         lines: Math.round(rect.height / lineHeight),
-        text: (element.textContent ?? "").replace(/\\s+/g, " ").trim(),
+        text: (element.textContent ?? "").replace(/\s+/g, " ").trim(),
         viewport: document.documentElement.clientWidth,
         elementWidth: rect.width,
       };
