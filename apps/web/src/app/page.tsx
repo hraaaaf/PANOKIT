@@ -319,7 +319,6 @@ export default function HomePage() {
             );
           })}
         </div>
-        <p className="art-note">Illustrations extraites du mockup de référence ; contrôle des visuels haute définition avant commercialisation.</p>
       </section>
 
       <section className="home-secondary" id="comment-ca-marche">
