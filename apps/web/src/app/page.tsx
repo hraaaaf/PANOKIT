@@ -321,6 +321,11 @@ export default function HomePage() {
         </div>
       </section>
 
+      <div className="reference-wave" aria-hidden="true">
+        <svg viewBox="0 0 1440 76" preserveAspectRatio="none">
+          <path d="M0 25C350 83 1040 -4 1440 27" fill="none" stroke="#f46b0a" strokeWidth="4" />
+        </svg>
+      </div>
       <section className="home-secondary" id="comment-ca-marche">
         <div>
           <span className="section-kicker">CONCEPTION SIMPLIFIÉE</span>
