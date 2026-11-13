@@ -37,10 +37,22 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--brand-orange); 
 .category-section { max-width: 1380px; padding: 4px clamp(20px, 3.1vw,44px) 0; margin: 0 auto; scroll-margin-top: 25px; }
 .category-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 23px 20px; }
 .category-card { background: #fff; border: 1px solid var(--brand-outline); overflow: hidden; border-radius: 21px; box-shadow: 0 11px 19px #00000013; position: relative; transition: border-color .15s ease, box-shadow .15s ease; }
-.category-card:hover, .category-card.selected { border-color: var(--brand-orange); box-shadow: 0 10px 24px #ed730a28; }
+.category-card:hover, .category-card.selected, .category-card.reference-emphasis { border-color: var(--brand-orange); box-shadow: 0 10px 24px #ed730a28; }
 .category-card.selected { outline: 2px solid var(--brand-orange); outline-offset: -2px; }
-.card-artwork { height: clamp(174px, 22vw, 306px); background: #ede8e0; overflow: hidden; }
+.card-artwork { aspect-ratio: 380 / 302; background: #ede8e0; overflow: hidden; }
 .scene-art { width: 100%; height: 100%; display: block; object-fit: cover; }
+.card-artwork.has-photo {
+  background-color: #ede8e0;
+  background-image: url("/images/panokit-cards.webp");
+  background-size: 300% 200%;
+  background-repeat: no-repeat;
+}
+.card-artwork.has-photo[data-family="enseignes"] { background-position: 0% 0%; }
+.card-artwork.has-photo[data-family="drapeaux"] { background-position: 50% 0%; }
+.card-artwork.has-photo[data-family="signaletique"] { background-position: 100% 0%; }
+.card-artwork.has-photo[data-family="plv"] { background-position: 0% 100%; }
+.card-artwork.has-photo[data-family="impression"] { background-position: 50% 100%; }
+.card-artwork.has-photo[data-family="habillage"] { background-position: 100% 100%; }
 .category-title-row { width: 100%; border: 0; padding: 16px 18px; display: flex; align-items: center; text-align: left; min-height: 78px; background: #fff; gap: 13px; color: var(--brand-ink); cursor: pointer; }
 .category-title-row > svg { color: var(--brand-orange); flex-shrink: 0; }
 .category-title-row > span:nth-child(2) { text-transform: uppercase; font-size: clamp(14px,1.65vw,21px); font-weight: 850; letter-spacing: -.035em; line-height: 1.1; }
@@ -75,7 +87,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--brand-orange); 
   .mobile-nav { display: flex; flex-direction: column; padding: 8px 22px 16px; border-top: 1px solid #eee; }
   .mobile-nav a { padding: 13px 4px; border-bottom: 1px solid #f2eee7; font-weight: 650; }
   .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .card-artwork { height: clamp(195px, 32vw, 265px); }
 }
 @media (max-width: 600px) {
   .home-hero { padding: 42px 22px 24px; }
@@ -85,7 +96,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--brand-orange); 
   .eyebrow-line { width: 24px; }
   .headline-stroke { margin-left: 20px; max-width: 65vw; }
   .category-grid { grid-template-columns: minmax(0, 1fr); gap: 17px; }
-  .card-artwork { height: min(62vw, 250px); }
   .category-title-row { min-height: 72px; }
   .category-title-row > span:nth-child(2) { font-size: 19px; }
   .home-secondary { flex-direction: column; align-items: flex-start; padding: 40px 24px; }
