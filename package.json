@@ -1,0 +1,17 @@
+{
+  "name": "panokit",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.22.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:web": "pnpm --filter @panokit/web dev",
+    "dev:api": "pnpm --filter @panokit/api dev",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "pnpm -r --if-present lint",
+    "test": "pnpm -r --if-present test",
+    "build": "pnpm -r --if-present build"
+  }
+}
