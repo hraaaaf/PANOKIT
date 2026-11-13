@@ -9,6 +9,7 @@ try {
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   await desktop.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
   assert.equal(await desktop.locator(".category-card").count(), 6, "Six category cards required");
+  assert.match(await desktop.title(), /^PANOKIT \| Enseignes et signalétique en kit$/, "Published preview must not retain bootstrap metadata");
 
   await desktop.locator(".card-artwork.has-photo").first().waitFor({ timeout: 8000 });
   const imageCSS = await desktop.locator(".card-artwork.has-photo").first().evaluate(
@@ -85,10 +86,46 @@ try {
       measurement.elementWidth <= measurement.viewport + 1,
       `Tagline container should not overflow at ${width}px`,
     );
+    const dimensions = await narrowPage.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }));
+    assert.ok(
+      dimensions.scrollWidth <= dimensions.viewport + 1,
+      `Entire page must not overflow horizontally at ${width}px: ${JSON.stringify(dimensions)}`,
+    );
     await narrowPage.close();
   }
 
-  console.log("J02 browser checks passed: artwork, six cards, hover, keyboard, mobile touch/menu and two-line tagline at 9 widths.");
+  const colorData = await desktop.evaluate(() => {
+    const cta = document.querySelector(".primary-action");
+    const kicker = document.querySelector(".section-kicker");
+    const panel = document.querySelector(".home-secondary");
+    if (!cta || !kicker || !panel) throw new Error("Required visual elements missing");
+    return {
+      ctaFg: getComputedStyle(cta).color,
+      ctaBg: getComputedStyle(cta).backgroundColor,
+      kickerFg: getComputedStyle(kicker).color,
+      kickerBg: getComputedStyle(panel).backgroundColor,
+    };
+  });
+  const luminance = (rgb) => {
+    const rgbArray = rgb.match(/\\d+(?:\\.\\d+)?/g)?.slice(0, 3).map(Number);
+    if (!rgbArray || rgbArray.length !== 3) throw new Error(`Unexpected CSS color: ${rgb}`);
+    const linear = rgbArray.map(v => {
+      const c = v / 255;
+      return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+    return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
+  };
+  const contrast = (a, b) => {
+    const values = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (values[0] + 0.05) / (values[1] + 0.05);
+  };
+  assert.ok(contrast(colorData.ctaFg, colorData.ctaBg) >= 4.5, "Quote CTA must meet AA text contrast");
+  assert.ok(contrast(colorData.kickerFg, colorData.kickerBg) >= 4.5, "Small orange kicker must meet AA text contrast");
+
+  console.log("J02 checks passed: images, hover, keyboard, touch, two-line tagline, horizontal overflow, document metadata, CTA/label color contrast.");
 } finally {
   await browser.close();
 }
