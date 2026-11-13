@@ -52,6 +52,10 @@ jobs:
           npx -y playwright@1.56.1 screenshot --browser chromium --viewport-size "1440,1100" --wait-for-timeout 1500 --full-page http://127.0.0.1:3000/ proof/accueil-desktop-1440.png
           npx -y playwright@1.56.1 screenshot --browser chromium --viewport-size "768,1024" --wait-for-timeout 1500 --full-page http://127.0.0.1:3000/ proof/accueil-tablet-768.png
           npx -y playwright@1.56.1 screenshot --browser chromium --viewport-size "390,844" --wait-for-timeout 1500 --full-page http://127.0.0.1:3000/ proof/accueil-mobile-390.png
+      - name: Install isolated browser test package
+        run: npm install --prefix /tmp/panokit-playwright --no-save --no-audit --no-fund playwright@1.56.1
+      - name: Verify desktop and mobile interactions
+        run: node apps/web/scripts/j02-browser-check.mjs
       - name: Upload visual proof, not deploy
         uses: actions/upload-artifact@v4
         with:
