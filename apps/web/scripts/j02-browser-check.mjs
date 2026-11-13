@@ -97,6 +97,7 @@ try {
     await narrowPage.close();
   }
 
+  await desktop.goto("http://127.0.0.1:3000/", { waitUntil: "networkidle" });
   const colorData = await desktop.evaluate(() => {
     const cta = document.querySelector(".primary-action");
     const kicker = document.querySelector(".section-kicker");
