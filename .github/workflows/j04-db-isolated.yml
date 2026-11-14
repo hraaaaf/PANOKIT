@@ -1,0 +1,39 @@
+name: J04 isolated PostgreSQL tests (no deploy)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/api/db/**"
+      - ".github/workflows/j04-db-isolated.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: panokit_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Postgres client if missing
+        run: command -v psql || (sudo apt-get update && sudo apt-get install -y postgresql-client)
+      - name: Check SQL migration, refusals and rollback on CI database only
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: panokit_ci_only
+        run: bash apps/api/db/scripts/test-migration.sh
