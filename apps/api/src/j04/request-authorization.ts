@@ -14,7 +14,7 @@ export interface IdentityVerifier {
   verifyBearerToken(token: string): Promise<VerifiedIdentity | null>;
 }
 export interface MembershipStore {
-  getCurrentMembership(userId: string): Promise<StaffMembership | null>;
+  getCurrentMembership(userId: string, resource?: AuthorizedResource): Promise<StaffMembership | null>;
 }
 export type AuthorizationResult = Readonly<{
   allowed: boolean;
@@ -52,7 +52,7 @@ export async function authorizeBearerRequest(
 
   let membership: StaffMembership | null;
   try {
-    membership = await memberships.getCurrentMembership(identity.userId);
+    membership = await memberships.getCurrentMembership(identity.userId, resource);
   } catch {
     return { allowed: false, reason: "MEMBERSHIP_LOOKUP_FAILED" };
   }
