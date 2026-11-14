@@ -110,6 +110,32 @@ try {
       dimensions.scrollWidth <= dimensions.viewport + 1,
       `Entire page must not overflow horizontally at ${width}px: ${JSON.stringify(dimensions)}`,
     );
+
+    // J02 approved mobile layout: two complete, interactive cards per row.
+    const cardsLayout = await narrowPage.evaluate(() => {
+      const grid = document.querySelector(".category-grid");
+      const cards = [...document.querySelectorAll(".category-card")];
+      if (!grid || cards.length !== 6) throw new Error("Category grid/card count missing");
+      const rects = cards.map(card => card.getBoundingClientRect());
+      const labels = [...document.querySelectorAll(".category-title-row > span:nth-child(2)")];
+      const buttons = [...document.querySelectorAll(".category-title-row")];
+      return {
+        columns: getComputedStyle(grid).gridTemplateColumns.trim().split(/\s+/).length,
+        top0: rects[0].top,
+        top1: rects[1].top,
+        top2: rects[2].top,
+        left0: rects[0].left,
+        left1: rects[1].left,
+        minButtonHeight: Math.min(...buttons.map(button => button.getBoundingClientRect().height)),
+        labelsFit: labels.every(label => label.scrollWidth <= label.clientWidth + 1),
+      };
+    });
+    assert.equal(cardsLayout.columns, 2, `Mobile must have exactly 2 grid columns at ${width}px`);
+    assert.ok(Math.abs(cardsLayout.top0 - cardsLayout.top1) <= 1, `First two cards share a row at ${width}px`);
+    assert.ok(cardsLayout.left1 > cardsLayout.left0, `Second card follows first on the same row at ${width}px`);
+    assert.ok(cardsLayout.top2 > cardsLayout.top0, `Third card starts the next row at ${width}px`);
+    assert.ok(cardsLayout.minButtonHeight >= 44, `Category tap targets remain at least 44px at ${width}px`);
+    assert.ok(cardsLayout.labelsFit, `Category labels must not overflow their allocated width at ${width}px`);
     await narrowPage.close();
   }
 
