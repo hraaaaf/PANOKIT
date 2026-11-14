@@ -1,6 +1,6 @@
 import {strict as assert} from "node:assert";
 import {test} from "node:test";
-import {ForbiddenException,type ExecutionContext} from "@nestjs/common";
+import {ForbiddenException,UnauthorizedException,type ExecutionContext} from "@nestjs/common";
 import {J04AuthorizationGuard} from "./j04/nest-authorization.guard";
 import {createPostgresMembershipStore,createPostgresJobResolver,type ReadOnlyPg} from "./j04/postgres-authorization";
 const user="11111111-1111-4111-8111-111111111111";
@@ -21,8 +21,8 @@ function fixture(o:{revoked?:boolean;cross?:boolean;unassigned?:boolean;offline?
   }};
   return {calls,guard:new J04AuthorizationGuard(verifier,createPostgresMembershipStore(db),"view_production_job",createPostgresJobResolver(db))};
 }
-function ctx(id:string,body:object={}):ExecutionContext{
-  return {switchToHttp:()=>({getRequest:()=>({params:{jobId:id},body,headers:{authorization:"Bearer signed"}})})} as unknown as ExecutionContext;
+function ctx(id:string,body:object={},authorization="Bearer signed"):ExecutionContext{
+  return {switchToHttp:()=>({getRequest:()=>({params:{jobId:id},body,headers:{authorization}})})} as unknown as ExecutionContext;
 }
 test("scoped SQL membership and exact assignment succeed",async()=>{
   const {guard,calls}=fixture();
@@ -41,4 +41,11 @@ test("client role/factory ignored; SQL-injection job rejected without DB call",a
   const n=calls.length;
   await assert.rejects(()=>guard.canActivate(ctx("';DROP TABLE jobs;--")),ForbiddenException);
   assert.equal(calls.length,n);
+});
+
+test("unauthenticated requests never query PostgreSQL or disclose job existence",async()=>{
+  const {guard,calls}=fixture();
+  await assert.rejects(()=>guard.canActivate(ctx(job,{},"Bearer invalid")),UnauthorizedException);
+  await assert.rejects(()=>guard.canActivate(ctx("';DROP TABLE x;--",{},"")),UnauthorizedException);
+  assert.equal(calls.length,0);
 });
