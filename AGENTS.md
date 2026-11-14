@@ -9,6 +9,14 @@ Ce fichier guide les assistants et contributeurs. Il n'autorise **aucune action 
 3. `roadmap.md` est un **miroir résumant Notion**, pas une seconde source de vérité ; ne pas le traiter comme une validation autonome.
 4. Après une décision ou un jalon exécuté, **mettre à jour la même page Notion** avec cases à cocher, GOAL / SUCCESS / PROOF, preuves, statut et prochaine action ; relire pour vérifier.
 
+## Reporting utilisateur — pilotage rapide (règle du 14 novembre 2026)
+
+- **Réponse par défaut : 3 à 5 tirets, jalons ou un schéma concis**, consacrés uniquement à ce qui est terminé, au résultat, au blocage majeur et au **Next**.
+- Ne pas envoyer de rapport technique complet, journal de tests, série de captures, fichiers ou multiples liens **sans demande explicite**. Une vidéo ou un visuel n'est présenté que s'il aide à décider ou s'il est demandé.
+- Conserver tous les détails **GOAL / SUCCESS / PROOF**, checkboxes, commits, tests et décisions dans **l'unique roadmap Notion canonique**, à vérifier après chaque exécution ; communiquer au plus un lien utile quand nécessaire.
+- Finir brièvement par **PANOKIT → lot → sous-lot → statut / Next**, avec PR et run GitHub seulement s'ils existent et sont utiles. Recommander l'effort GPT en une courte mention.
+- **Ne pas sacrifier les alertes importantes** : risque, sécurité, blocage et besoin de GO distinct pour merge, migrations ou déploiement Vercel doivent rester explicites.
+
 ## Qualité et exécution
 
 - Privilégier des changements **petits, contrôlables et testables** sur une branche ; pas de merge automatique sans validation humaine.
