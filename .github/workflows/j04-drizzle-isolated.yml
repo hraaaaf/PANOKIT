@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - feat/j04-d1b-drizzle-20261114
-  pull_request:
-    branches:
-      - feat/j04-d1-isolated-postgres-20261114
+# Single push trigger on this isolated branch; avoid duplicate runs on stacked PRs.
+
+concurrency:
+  group: j04-drizzle-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
