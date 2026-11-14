@@ -1,0 +1,58 @@
+name: J04 Drizzle isolated proof (no deploy)
+
+on:
+  push:
+    branches:
+      - feat/j04-d1b-drizzle-20261114
+  pull_request:
+    branches:
+      - feat/j04-d1-isolated-postgres-20261114
+
+permissions:
+  contents: read
+
+jobs:
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: panokit_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10.22.0'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - name: Install exact pinned workspace dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Validate Drizzle migration history
+        run: pnpm --filter @panokit/api db:check
+      - name: Detect Drizzle schema drift (no changes permitted)
+        run: |
+          pnpm --filter @panokit/api db:generate
+          git diff --exit-code -- apps/api/db/drizzle-generated
+          test -z "$(git ls-files --others --exclude-standard apps/api/db/drizzle-generated)"
+      - name: Check actual Drizzle SQL plus locked-down PostgreSQL overlay
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: panokit_ci_only
+        run: bash apps/api/db/scripts/test-migration.sh
+
+# Read-only CI on an ephemeral PostgreSQL service; no Supabase and no Vercel.
