@@ -44,7 +44,7 @@ try {
         return {
           viewport: window.innerWidth, pageWidth: document.documentElement.scrollWidth,
           direction: root ? getComputedStyle(root).direction : "",
-          columnCount: grid ? getComputedStyle(grid).gridTemplateColumns.trim().split(/\\s+/).length : -1,
+          columnCount: grid ? getComputedStyle(grid).gridTemplateColumns.trim().split(" ").length : -1,
           boxes: cards.map((item) => {
             const b = item.getBoundingClientRect();
             return { left: b.left, top: b.top, width: b.width, height: b.height };
