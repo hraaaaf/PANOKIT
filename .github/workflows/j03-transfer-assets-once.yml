@@ -1,0 +1,58 @@
+name: J03 one-time approved artwork transfer (no deploy)
+
+on:
+  push:
+    branches:
+      - feat/j03-catalogue-d1
+    paths:
+      - ".github/workflows/j03-transfer-assets-once.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: panokit-j03-approved-art-transfer
+  cancel-in-progress: false
+
+jobs:
+  transfer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Fetch exact approved archive and verify fingerprint
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --retry 2 --max-time 120 \
+            "https://at.adobe.com/rUFCdNvSn10LHArI" -o /tmp/j03-approved.zip
+          echo "027ca2a4f5a41b6a65652b58988fc5032a638d29f327b929a330d32d33d31d35  /tmp/j03-approved.zip" | sha256sum --check --status
+          mkdir -p apps/web/public/visuals/catalogue
+          for id in 01 02 03 04; do
+            unzip -p /tmp/j03-approved.zip "public/visuals/catalogue/CAT-ENS-${id}.webp" \
+              > "apps/web/public/visuals/catalogue/CAT-ENS-${id}.webp"
+          done
+          cat > /tmp/j03-sha256-checks.txt <<'HASHES'
+          8223be86021e8624c66b4e61147c1e555a7b7863c4e833fa88cca7cc7bbdef6d  apps/web/public/visuals/catalogue/CAT-ENS-01.webp
+          0994a10493b9d79855c08ee5a66887ccd625f5e0ac794881c0320aad67a0d1e9  apps/web/public/visuals/catalogue/CAT-ENS-02.webp
+          4ef7bc7ea49d661c3b1d9503de79c1c6ab930aa031a83eea3d4b7ef09ef01b2b  apps/web/public/visuals/catalogue/CAT-ENS-03.webp
+          e5f9339e01fc2df7e100576163155ea728bad83de6ecb65f4ecee7d3dea8bb2a  apps/web/public/visuals/catalogue/CAT-ENS-04.webp
+          HASHES
+          sha256sum --check /tmp/j03-sha256-checks.txt
+          file apps/web/public/visuals/catalogue/*.webp
+      - name: Commit exact approved images to J03 branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF}" = "refs/heads/feat/j03-catalogue-d1"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- apps/web/public/visuals/catalogue/CAT-ENS-{01,02,03,04}.webp
+          if git diff --cached --quiet; then
+            echo "Approved images already present: no commit."
+            exit 0
+          fi
+          git commit -m "assets(j03): add four SHA256-verified approved WebP illustrations"
+          git push origin HEAD:refs/heads/feat/j03-catalogue-d1
