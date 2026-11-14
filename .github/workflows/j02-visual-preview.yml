@@ -4,6 +4,16 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - feat/j03-catalogue-d1
+    paths:
+      - ".github/workflows/j02-visual-preview.yml"
+      - "apps/web/src/app/catalogue/**"
+      - "apps/web/src/components/j03/**"
+      - "apps/web/src/lib/j03-catalogue.ts"
+      - "apps/web/public/visuals/catalogue/**"
+      - "apps/web/scripts/j03-browser-check.mjs"
   workflow_dispatch:
 
 permissions:
@@ -56,10 +66,13 @@ jobs:
         run: npm install --prefix /tmp/panokit-playwright --no-save --no-audit --no-fund playwright@1.56.1
       - name: Verify desktop and mobile interactions
         run: node apps/web/scripts/j02-browser-check.mjs
+      - name: Verify J03 catalogue FR/AR, real assets, and blocked-format journey
+        if: ${{ hashFiles('apps/web/scripts/j03-browser-check.mjs') != '' }}
+        run: node apps/web/scripts/j03-browser-check.mjs
       - name: Upload visual proof, not deploy
         uses: actions/upload-artifact@v4
         with:
-          name: panokit-j02-visual-proof
+          name: panokit-j02-j03-visual-proof
           path: |
             proof/*.png
             design.md
