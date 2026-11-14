@@ -2,8 +2,8 @@
 
 Source : [roadmap Notion canonique](https://app.notion.com/p/41777c6633628195b96cdc442fae78ec).
 Ces quatre illustrations ont été validées par l'utilisateur lors de J03-V2 et contrôlées visuellement sur la maquette isolée en J03-V3.
-**Elles ne sont PAS présentes dans cette branche au moment de la création de ce manifeste.**
-Le code J03 utilise un fallback textuel explicite en cas d'absence de fichier, et aucun autre dessin ne doit être substitué automatiquement.
+**Les quatre fichiers WebP ont été ajoutés à la branche J03 via un transfert GitHub Actions à empreinte SHA-256 vérifiée.**
+Le code J03 conserve un fallback explicite si un fichier est inaccessible ; aucun dessin différent ne doit être substitué.
 
 ## Fichiers attendus dans ce même dossier
 
@@ -26,4 +26,4 @@ Le code J03 utilise un fallback textuel explicite en cas d'absence de fichier, e
 sha256sum apps/web/public/visuals/catalogue/CAT-ENS-0{1,2,3,4}.webp
 ```
 
-**GOAL** : préserver les quatre visuels validés sans les dégrader. **SUCCESS** : assets présents et intègres à ces chemins, visibles sur mobile/desktop/AR. **PROOF** : SHA-256 + captures Next.js + CI.
+**GOAL** : préserver les quatre visuels validés sans les dégrader. **SUCCESS transfert** : 4 fichiers intégrés et SHA-256 contrôlés, run GitHub Actions #43578327521 réussi, blobs GitHub confirmés. **PROOF D2 en attente** : captures Next.js, tests navigateur FR/AR/RTL + CI après intégration. Aucune validation de fusion ou Vercel.
