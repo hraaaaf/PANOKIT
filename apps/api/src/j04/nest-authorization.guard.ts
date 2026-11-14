@@ -21,6 +21,16 @@ export class J04AuthorizationGuard implements CanActivate {
     const headers: unknown = (request as Record<string, unknown>).headers;
     const bearer = headers && typeof headers === "object"
       ? (headers as Record<string, unknown>).authorization : undefined;
+    // Authenticate before any dossier lookup; otherwise 401/403 can leak existence.
+    if (typeof bearer !== "string" || !/^Bearer [^\\s]+$/.test(bearer)) {
+      throw new UnauthorizedException();
+    }
+    try {
+      const identity = await this.verifier.verifyBearerToken(bearer.slice("Bearer ".length));
+      if (!identity?.userId || !identity.issuer) throw new UnauthorizedException();
+    } catch {
+      throw new UnauthorizedException();
+    }
     let resource: AuthorizedResource;
     try {
       resource = await this.trustedResource(request);
