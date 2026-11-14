@@ -22,7 +22,7 @@ export class J04AuthorizationGuard implements CanActivate {
     const bearer = headers && typeof headers === "object"
       ? (headers as Record<string, unknown>).authorization : undefined;
     // Authenticate before any dossier lookup; otherwise 401/403 can leak existence.
-    if (typeof bearer !== "string" || !/^Bearer [^\\s]+$/.test(bearer)) {
+    if (typeof bearer !== "string" || !/^Bearer [^\s]+$/.test(bearer)) {
       throw new UnauthorizedException();
     }
     try {
