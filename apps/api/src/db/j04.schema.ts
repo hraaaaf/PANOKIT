@@ -28,7 +28,7 @@ export const webOrders = privateSchema.table(
     sourceChannel: text("source_channel").notNull().default("PANOKIT_WEB"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [check("web_orders_origin_check", sql`${t.sourceChannel} = 'PANOKIT_WEB'`)],
+  (t) => [check("web_orders_origin_check", sql`"source_channel" = 'PANOKIT_WEB'`)],
 );
 
 export const provenanceRecords = privateSchema.table(
@@ -40,7 +40,7 @@ export const provenanceRecords = privateSchema.table(
     sourceChannel: text("source_channel").notNull().default("PANOKIT_WEB"),
     recordedAt: timestamp("recorded_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [check("provenance_origin_check", sql`${t.sourceChannel} = 'PANOKIT_WEB'`)],
+  (t) => [check("provenance_origin_check", sql`"source_channel" = 'PANOKIT_WEB'`)],
 );
 
 export const orderEvents = privateSchema.table(
@@ -54,7 +54,7 @@ export const orderEvents = privateSchema.table(
     occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    check("event_name_nonempty", sql`length(trim(${t.eventName})) > 0`),
+    check("event_name_nonempty", sql`length(trim("event_name")) > 0`),
   ],
 );
 
@@ -73,7 +73,7 @@ export const productionJobs = privateSchema.table(
   (t) => [
     check(
       "production_jobs_technical_status_chk",
-      sql`${t.technicalStatus} IN ('PENDING_REVIEW','IN_REVIEW','NEEDS_CORRECTION','TECH_APPROVED')`,
+      sql`"technical_status" IN ('PENDING_REVIEW','IN_REVIEW','NEEDS_CORRECTION','TECH_APPROVED')`,
     ),
     index("production_jobs_factory_idx").on(t.factoryId, t.technicalStatus),
   ],
@@ -92,10 +92,10 @@ export const transactionOutbox = privateSchema.table(
     attempts: integer("attempts").notNull().default(0),
   },
   (t) => [
-    check("outbox_event_limited", sql`${t.eventName} = 'TECH_REVIEW_REQUESTED'`),
-    check("outbox_attempts_nonnegative", sql`${t.attempts} >= 0`),
+    check("outbox_event_limited", sql`"event_name" = 'TECH_REVIEW_REQUESTED'`),
+    check("outbox_attempts_nonnegative", sql`"attempts" >= 0`),
     index("transaction_outbox_pending_idx")
       .on(t.createdAt)
-      .where(sql`${t.deliveredAt} IS NULL`),
+      .where(sql`"delivered_at" IS NULL`),
   ],
 );
