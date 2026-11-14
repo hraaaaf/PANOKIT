@@ -78,11 +78,13 @@ try {
   equal(await page.locator(".j03-family-card").count(), 2, "Family chooser offers two options");
   equal(await page.locator(".j03-family-card--disabled a").count(), 0, "Non-lumineuses cannot be purchased");
   await page.locator('.j03-family-card[href*="/lumineuses"]').click();
+  await page.waitForURL((url) => url.pathname === "/catalogue/enseignes/lumineuses", { timeout: 15000 });
   ok(page.url().includes("/catalogue/enseignes/lumineuses"), "Lumineuses selection opens gallery");
 
   const firstLink = page.locator(".j03-model-card__link").first();
   await firstLink.focus();
   await firstLink.press("Enter");
+  await page.waitForURL((url) => url.pathname.endsWith("/lettres-frontales"), { timeout: 15000 });
   ok(page.url().includes("/lettres-frontales"), "Keyboard Enter opens model selection");
   equal(await page.locator('input[type="radio"][name="activity"]').count(), 3, "Activity selection has 3 categories");
   equal(await page.locator(".j03-action").isDisabled(), true, "Continue disabled until activity selected");
