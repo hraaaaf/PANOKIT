@@ -11,11 +11,11 @@
 ### Phase A — Fondations et gouvernance
 
 - [x] **J00 — Vision, gouvernance et documentation.** Modèle « IKEA des panneaux », architecture ciblée et six fichiers Markdown disponibles ; Notion est la roadmap canonique. **Statut : cadrage initial terminé.**
-- [ ] **J01 — Monorepo, CI et reproductibilité.** Next.js, NestJS, contrats partagés, GitHub Actions, lockfile pnpm figé, contrôles et revue humaine. **Statut : en cours**. [PR #1](https://github.com/hraaaaf/PANOKIT/pull/1).
+- [x] **J01 — Monorepo, CI et reproductibilité.** Next.js, NestJS, contrats partagés, lockfile pnpm figé, CI verte et GO humain. **Statut : terminé, PR #1 fusionnée**. [PR #1](https://github.com/hraaaaf/PANOKIT/pull/1).
 
 ### Phase B — Vitrine et catalogue
 
-- [ ] **J02 — Design system et accueil.** Reproduire fidèlement le dernier mockup validé : six illustrations premium, grille 3×2, interactions desktop/mobile, accessibilité, comparaison avant/après. **Statut : en cours** ; [PR #2](https://github.com/hraaaaf/PANOKIT/pull/2).
+- [ ] **J02 — Design system et accueil.** Nouveau contrat **visuels maîtres AVANT finalisation du code** : hero ACC-HERO-01 + six cartes ACC-CAT-01 à 06, dans le croquis architectural de la nouvelle image utilisateur ; images indépendantes à proposer et faire approuver. La structure Next.js et les SVG existants sont des prototypes provisoires. Comparer 1 et 2 colonnes mobiles avant arbitrage. **Statut : en cours, GO visuels et GO merge non reçus** ; [PR #2](https://github.com/hraaaaf/PANOKIT/pull/2).
 - [ ] **J03 — Catalogue et standardisation industrielle.** Familles, quatre enseignes lumineuses, caisson pilote, formats et composants réels confirmés par l'usine.
 
 ### Phase C — Commerce et personnalisation
@@ -39,6 +39,20 @@
 - [ ] **J14 — Démonstration Vercel DEV.** Deux applications séparées. **Jamais de déploiement sans GO explicite**, même DEV.
 - [ ] **J15 — Choix PROD et lancement.** Hébergement de production non décidé ; plan de lancement pilote, GO distinct requis.
 
+## Règle transversale VISUELS AVANT CODE — validée le 13 novembre 2026
+
+**Ce fichier est un résumé, pas une nouvelle roadmap.** Sur chaque nouvelle page ayant un rendu visuel, la [roadmap Notion](https://app.notion.com/p/41777c6633628195b96cdc442fae78ec) exige :
+- [ ] **V0** inventaire des visuels / états de page et ID, placement et crops responsive ;
+- [ ] **V1** proposition de dessins conforme au croquis architectural PANOKIT de [design.md](design.md) ;
+- [ ] **V2** création des assets séparés, et **V3** contrôle visuel/crops et cohérence ;
+- [ ] **V4** **GO humain sur les VISUELS**, avec preuve dans Notion, **avant de commencer le code de la nouvelle page** ;
+- [ ] **D1/D2** intégration React, tests et captures des images approuvées ;
+- [ ] **D3** GO page, puis **GO distinct de merge**, et aucun Vercel sans GO explicite.
+
+**Gates par page :** J02 accueil (ACC-HERO + ACC-CAT), J03 galerie (CAT-ENS-01 à 04) / autres familles / métiers (MET) / formats (FMT), J05 Studio (STU), J06 devis (DEV), J07 checkout (CHK), J08 BAT, J09 atelier (FAB), J10 back-office (wireframes sans images décoratives obligatoires), J11 suivi (SUI). J12 infrastructure sans graphisme n'a pas d'illustration obligatoire ; J13 teste les visuels réellement approuvés. Détails, statuts et cases **uniquement dans Notion**.
+
+**J02 = jalon canonique ; LOT 01 — Accueil = ancien nom de travail ; PR #2 = numéro de pull request.** Ne pas confondre. L'atlas issu d'une capture n'est pas le jeu de 7 images maîtres indépendantes approuvées.
+
 ## Garde-fous
 
 - Chaque jalon exige **GOAL / SUCCESS / PROOF**, résultats CI et revue humaine avant clôture.
@@ -50,6 +64,6 @@
 
 ## Prochaine action
 
-**J01 d'abord**, avec lockfile pnpm, installation `--frozen-lockfile`, CI verte sur la tête de PR #1 et revue humaine ; **J02** ensuite pour intégrer les véritables assets du mockup dans la PR #2. La source Notion est prioritaire lors de tout avancement.
+**J01 est terminé** et PR #1 fusionnée. **J02 maintenant : d'abord planche et validation des 7 nouveaux dessins**, puis intégration aux composants existants, captures, tests et GO distinct. Ensuite J03 applique le même gate aux quatre modèles lumineux avant toute nouvelle page. La source Notion est prioritaire lors de tout avancement.
 
 **Ne pas créer une deuxième roadmap canonique dans GitHub ou dans un autre document.**
