@@ -1,0 +1,48 @@
+name: J04-D3-B2 PostgreSQL permissions isolated (no deploy)
+on:
+  push:
+    branches:
+      - feat/j04-d3b2-postgres-authz-20261114
+permissions:
+  contents: read
+jobs:
+  postgres-permissions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: panokit_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: panokit_ci_only
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch pinned PR #7 Drizzle schema (read-only, separate checkout)
+        uses: actions/checkout@v4
+        with:
+          repository: hraaaaf/PANOKIT
+          ref: 644ac91cbc1636340e04930fb4f4b7f057171220
+          path: ref-drizzle
+          persist-credentials: false
+      - name: Prove original Drizzle commit is pinned
+        run: test "$(git -C ref-drizzle rev-parse HEAD)" = 644ac91cbc1636340e04930fb4f4b7f057171220
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+      - name: Migrate and test ONLY disposable local PG16 instance
+        run: bash apps/api/db/scripts/test-d3b2-postgres.sh
+# Deliberately no Supabase, Vercel, secrets, or production migrations.

@@ -5,16 +5,13 @@ import {
   type StaffMembership,
 } from "./authorization-policy";
 
-/**
- * D3-A trusted adapter contracts. No direct Supabase access or real JWT
- * verification yet. A token string is not itself a verified identity.
- */
+/** A caller-provided token is never treated as an identity without verification. */
 export type VerifiedIdentity = Readonly<{ userId: string; issuer: string }>;
 export interface IdentityVerifier {
   verifyBearerToken(token: string): Promise<VerifiedIdentity | null>;
 }
 export interface MembershipStore {
-  getCurrentMembership(userId: string): Promise<StaffMembership | null>;
+  getCurrentMembership(userId: string, resource?: AuthorizedResource): Promise<StaffMembership | null>;
 }
 export type AuthorizationResult = Readonly<{
   allowed: boolean;
@@ -29,6 +26,33 @@ export const denyAllMembershipStore: MembershipStore = {
   async getCurrentMembership(): Promise<null> { return null; },
 };
 
+/** Only invoke with an identity already cryptographically verified by the server. */
+export async function authorizeVerifiedIdentityRequest(
+  identity: VerifiedIdentity,
+  operation: AuthorizedOperation,
+  resource: AuthorizedResource,
+  memberships: MembershipStore = denyAllMembershipStore,
+): Promise<AuthorizationResult> {
+  if (!identity?.userId || !identity.issuer) {
+    return { allowed: false, reason: "IDENTITY_UNVERIFIED" };
+  }
+  let membership: StaffMembership | null;
+  try {
+    membership = await memberships.getCurrentMembership(identity.userId, resource);
+  } catch {
+    return { allowed: false, reason: "MEMBERSHIP_LOOKUP_FAILED" };
+  }
+  if (!membership || membership.userId !== identity.userId) {
+    return { allowed: false, reason: "MEMBERSHIP_MISMATCH" };
+  }
+  const access = authorizeStaff(membership, operation, resource);
+  return {
+    allowed: access.allowed,
+    reason: access.reason,
+    ...(access.allowed ? { userId: identity.userId } : {}),
+  };
+}
+
 export async function authorizeBearerRequest(
   authHeader: string | undefined,
   operation: AuthorizedOperation,
@@ -39,7 +63,6 @@ export async function authorizeBearerRequest(
   if (!authHeader || !/^Bearer [^\s]+$/.test(authHeader)) {
     return { allowed: false, reason: "BEARER_TOKEN_REQUIRED" };
   }
-
   let identity: VerifiedIdentity | null;
   try {
     identity = await verifier.verifyBearerToken(authHeader.slice("Bearer ".length));
@@ -49,23 +72,5 @@ export async function authorizeBearerRequest(
   if (!identity?.userId || !identity.issuer) {
     return { allowed: false, reason: "IDENTITY_UNVERIFIED" };
   }
-
-  let membership: StaffMembership | null;
-  try {
-    membership = await memberships.getCurrentMembership(identity.userId);
-  } catch {
-    return { allowed: false, reason: "MEMBERSHIP_LOOKUP_FAILED" };
-  }
-  // Never trust a membership for someone else, user_metadata, stale or
-  // revoked membership state, or caller-supplied role claims.
-  if (!membership || membership.userId !== identity.userId) {
-    return { allowed: false, reason: "MEMBERSHIP_MISMATCH" };
-  }
-
-  const access = authorizeStaff(membership, operation, resource);
-  return {
-    allowed: access.allowed,
-    reason: access.reason,
-    ...(access.allowed ? { userId: identity.userId } : {}),
-  };
+  return authorizeVerifiedIdentityRequest(identity, operation, resource, memberships);
 }

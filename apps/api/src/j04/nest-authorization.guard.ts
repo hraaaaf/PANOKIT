@@ -1,10 +1,15 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
-import { authorizeBearerRequest, type IdentityVerifier, type MembershipStore } from "./request-authorization";
+import {
+  authorizeVerifiedIdentityRequest,
+  type IdentityVerifier,
+  type MembershipStore,
+  type VerifiedIdentity,
+} from "./request-authorization";
 import type { AuthorizedOperation, AuthorizedResource } from "./authorization-policy";
 
 /**
- * Deliberately not bound to a route until authenticated SQL adapters exist.
- * Neither headers nor request bodies may supply factory membership claims.
+ * Authenticates BEFORE resource resolution and uses exactly one signature
+ * verification per request. This remains unbound from the production AppModule.
  */
 @Injectable()
 export class J04AuthorizationGuard implements CanActivate {
@@ -12,7 +17,7 @@ export class J04AuthorizationGuard implements CanActivate {
     private readonly verifier: IdentityVerifier,
     private readonly memberships: MembershipStore,
     private readonly operation: AuthorizedOperation,
-    private readonly trustedResource: (req: unknown) => Promise<AuthorizedResource>,
+    private readonly trustedResource: (req: unknown, identity: VerifiedIdentity) => Promise<AuthorizedResource>,
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
@@ -21,23 +26,28 @@ export class J04AuthorizationGuard implements CanActivate {
     const headers: unknown = (request as Record<string, unknown>).headers;
     const bearer = headers && typeof headers === "object"
       ? (headers as Record<string, unknown>).authorization : undefined;
-    let resource: AuthorizedResource;
-    try {
-      resource = await this.trustedResource(request);
-    } catch {
-      throw new ForbiddenException();
-    }
-    const decision = await authorizeBearerRequest(
-      typeof bearer === "string" ? bearer : undefined,
-      this.operation,
-      resource,
-      this.verifier,
-      this.memberships,
-    );
-    if (decision.allowed) return true;
-    if (decision.reason.startsWith("BEARER_") || decision.reason.startsWith("IDENTITY_")) {
+    if (typeof bearer !== "string" || !/^Bearer [^\s]+$/.test(bearer)) {
       throw new UnauthorizedException();
     }
+    let identity: VerifiedIdentity | null;
+    try {
+      identity = await this.verifier.verifyBearerToken(bearer.slice("Bearer ".length));
+    } catch {
+      throw new UnauthorizedException();
+    }
+    if (!identity?.userId || !identity.issuer) throw new UnauthorizedException();
+
+    let resource: AuthorizedResource;
+    try {
+      resource = await this.trustedResource(request, identity);
+    } catch {
+      // Do not disclose whether an unauthorized dossier exists.
+      throw new ForbiddenException();
+    }
+    const decision = await authorizeVerifiedIdentityRequest(
+      identity, this.operation, resource, this.memberships,
+    );
+    if (decision.allowed) return true;
     throw new ForbiddenException();
   }
 }
