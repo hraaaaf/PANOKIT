@@ -2,12 +2,29 @@
 set -euo pipefail
 : "${PGPASSWORD:?Only use isolated CI credentials}"
 export PGHOST="${PGHOST:-127.0.0.1}" PGPORT="${PGPORT:-5432}" PGUSER="${PGUSER:-postgres}" PGPASSWORD
+# Hard safety gate: this script creates/destroys a fixture DB. Never run
+# against Supabase, a developer's shared cluster or any non-CI endpoint.
+if [[ "${GITHUB_ACTIONS:-}" != "true" ||
+      "$PGHOST" != "127.0.0.1" ||
+      "$PGPORT" != "5432" ||
+      "$PGUSER" != "postgres" ]]; then
+  echo "REFUSED: isolated J04 fixture requires GitHub Actions local postgres:16" >&2
+  exit 1
+fi
 DB=panokit_j04_ci
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 psql -X -v ON_ERROR_STOP=1 -d postgres -c "CREATE DATABASE $DB"
-psql -X -v ON_ERROR_STOP=1 -d "$DB" -f "$ROOT/migrations/0001_j04_private_registry.sql"
-if psql -X -v ON_ERROR_STOP=1 -d "$DB" -f "$ROOT/migrations/0001_j04_private_registry.sql" >/dev/null 2>&1; then
- echo "FAIL: duplicate migration accepted"; exit 1
+# Check actual SQL emitted by drizzle-kit, NOT the legacy D1-A hand-written SQL.
+shopt -s nullglob
+generated_migrations=("$ROOT"/drizzle-generated/*.sql)
+if [ "${#generated_migrations[@]}" -ne 1 ]; then
+  echo "FAIL: expected exactly one committed Drizzle-generated migration" >&2
+  exit 1
+fi
+psql -X -v ON_ERROR_STOP=1 -d "$DB" -f "${generated_migrations[0]}"
+psql -X -v ON_ERROR_STOP=1 -d "$DB" -f "$ROOT/migrations/0002_j04_security_overlay.sql"
+if psql -X -v ON_ERROR_STOP=1 -d "$DB" -f "${generated_migrations[0]}" >/dev/null 2>&1; then
+ echo "FAIL: duplicate generated migration accepted"; exit 1
 fi
 
 psql -X -v ON_ERROR_STOP=1 -d "$DB" <<'SQL'
@@ -35,6 +52,10 @@ BEGIN
  END IF;
  IF EXISTS(SELECT 1 FROM pg_policies WHERE schemaname='panokit_private') THEN
   RAISE EXCEPTION 'C2 RLS permissions prematurely granted';
+ END IF;
+ IF (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+     WHERE n.nspname='panokit_private' AND c.relkind='r' AND c.relrowsecurity) <> 5 THEN
+  RAISE EXCEPTION 'RLS must be enabled on all five private tables';
  END IF;
 END $$;
 BEGIN;

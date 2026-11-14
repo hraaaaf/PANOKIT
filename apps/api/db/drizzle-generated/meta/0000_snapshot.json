@@ -1,0 +1,369 @@
+{
+  "id": "c37ed880-57c6-4f52-a52f-7ffb8093c347",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "panokit_private.order_events": {
+      "name": "order_events",
+      "schema": "panokit_private",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "order_events_id_seq",
+            "schema": "panokit_private",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "order_id": {
+          "name": "order_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_name": {
+          "name": "event_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "order_events_order_id_web_orders_id_fk": {
+          "name": "order_events_order_id_web_orders_id_fk",
+          "tableFrom": "order_events",
+          "tableTo": "web_orders",
+          "schemaTo": "panokit_private",
+          "columnsFrom": [
+            "order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "event_name_nonempty": {
+          "name": "event_name_nonempty",
+          "value": "length(trim(\"event_name\")) > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "panokit_private.production_jobs": {
+      "name": "production_jobs",
+      "schema": "panokit_private",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "order_id": {
+          "name": "order_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "factory_id": {
+          "name": "factory_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "assigned_operator_user_id": {
+          "name": "assigned_operator_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "technical_status": {
+          "name": "technical_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PENDING_REVIEW'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "production_jobs_factory_idx": {
+          "name": "production_jobs_factory_idx",
+          "columns": [
+            {
+              "expression": "factory_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "technical_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "production_jobs_order_id_web_orders_id_fk": {
+          "name": "production_jobs_order_id_web_orders_id_fk",
+          "tableFrom": "production_jobs",
+          "tableTo": "web_orders",
+          "schemaTo": "panokit_private",
+          "columnsFrom": [
+            "order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "production_jobs_technical_status_chk": {
+          "name": "production_jobs_technical_status_chk",
+          "value": "\"technical_status\" IN ('PENDING_REVIEW','IN_REVIEW','NEEDS_CORRECTION','TECH_APPROVED')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "panokit_private.provenance_records": {
+      "name": "provenance_records",
+      "schema": "panokit_private",
+      "columns": {
+        "order_id": {
+          "name": "order_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "source_channel": {
+          "name": "source_channel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PANOKIT_WEB'"
+        },
+        "recorded_at": {
+          "name": "recorded_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "provenance_records_order_id_web_orders_id_fk": {
+          "name": "provenance_records_order_id_web_orders_id_fk",
+          "tableFrom": "provenance_records",
+          "tableTo": "web_orders",
+          "schemaTo": "panokit_private",
+          "columnsFrom": [
+            "order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "provenance_origin_check": {
+          "name": "provenance_origin_check",
+          "value": "\"source_channel\" = 'PANOKIT_WEB'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "panokit_private.transaction_outbox": {
+      "name": "transaction_outbox",
+      "schema": "panokit_private",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "order_id": {
+          "name": "order_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_name": {
+          "name": "event_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "delivered_at": {
+          "name": "delivered_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attempts": {
+          "name": "attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "transaction_outbox_pending_idx": {
+          "name": "transaction_outbox_pending_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"delivered_at\" IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "transaction_outbox_order_id_web_orders_id_fk": {
+          "name": "transaction_outbox_order_id_web_orders_id_fk",
+          "tableFrom": "transaction_outbox",
+          "tableTo": "web_orders",
+          "schemaTo": "panokit_private",
+          "columnsFrom": [
+            "order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "outbox_event_limited": {
+          "name": "outbox_event_limited",
+          "value": "\"event_name\" = 'TECH_REVIEW_REQUESTED'"
+        },
+        "outbox_attempts_nonnegative": {
+          "name": "outbox_attempts_nonnegative",
+          "value": "\"attempts\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "panokit_private.web_orders": {
+      "name": "web_orders",
+      "schema": "panokit_private",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "source_channel": {
+          "name": "source_channel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PANOKIT_WEB'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "web_orders_origin_check": {
+          "name": "web_orders_origin_check",
+          "value": "\"source_channel\" = 'PANOKIT_WEB'"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {
+    "panokit_private": "panokit_private"
+  },
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

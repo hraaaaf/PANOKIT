@@ -1,17 +1,38 @@
-# J04-D1-A — PostgreSQL privé : candidat de migration
+# J04-D1-B — Schéma Drizzle typé, sans accès Supabase
 
-**État : PR de préparation uniquement. Pas de connexion à Supabase.**
+**Candidat en PR DRAFT empilée sur D1-A. Aucun schéma réel ni
+permission métier n'a été approuvé(e).** Choix B–F en suspens.
 
-- Les décisions C1/C2 B–F (accès PII, remboursements, rétention, commandes hors site, numérotation) restent **ouvertes** : rien n'est considéré approuvé.
-- Le seul périmètre SQL proposé est `panokit_private` : `web_orders`, `provenance_records`, `order_events`, `production_jobs`, `transaction_outbox`.
-- Enregistrement commande + provenance obligatoire à l'issue de la même transaction par FK cyclique différée ; origine toujours `PANOKIT_WEB` et non réécrivable par DML normal ; journaux append-only pour les comptes non propriétaires.
-- Refus par défaut : aucun GRANT pour le public, aucune politique RLS qui donnerait un accès, aucun rôle usine SQL ; pas de PII, prix, marges, paiement ou BAT dans ce socle.
-- La table des dossiers ne sait pas **autoriser la fabrication** : elle ne comporte que les statuts d'**examen technique**. L'acceptation technique n'est pas un feu vert de production.
-- Un propriétaire / superutilisateur PostgreSQL peut contourner les triggers et le RLS ; les tests ne prétendent pas à une immutabilité cryptographique ni à une API NestJS sécurisée.
-- Les tests exécutent cette migration uniquement sur un PostgreSQL 16 de GitHub Actions avec `panokit_j04_ci`, puis exécutent un rollback **interdit ailleurs**.
-- **J04-D1-B reste à faire** : ajouter Drizzle ORM/Kit avec versions et lockfile épinglés, générer une migration cohérente depuis le schéma Drizzle et tester son application/rollback ; ce SQL initial est rédigé à la main, **pas généré par Drizzle**.
-- **J04-D3 reste à faire** : authentification, guards NestJS, autorisations fines, RLS/GRANT contrôlés, transactions de confiance et test de fuites.
+## Source testée
 
-**Gate** : décision humaine sur C1/C2 avant adoption définitive ; aucune fusion, migration Supabase ni déploiement Vercel sans autorisation explicite et séparée.
+- `src/db/j04.schema.ts` : 5 tables minimales privées, sans PII/prix
+  ni possibilité de libération fabrication.
+- `drizzle.config.ts` : génération locale, sans credentials DB.
+- `db/drizzle-generated/0000_j04_private_registry.sql` et `meta/` :
+  **vrais fichiers Drizzle Kit générés** avec `drizzle-orm@0.45.4` et
+  `drizzle-kit@0.31.11` épinglés dans `pnpm-lock.yaml`.
+- `db/migrations/0002_j04_security_overlay.sql` : protections DML,
+  origine, FK différée (provenance au commit), RLS deny-by-default,
+  REVOKE et journal append-only, absentes de la génération Drizzle.
+- `db/scripts/test-migration.sh` : applique **le SQL généré**, puis
+  l'overlay, sur `panokit_j04_ci` uniquement ; teste 11 refus et la
+  suppression de la fixture. SQL du jalon D1-A `0001_j04_private_registry.sql`
+  est conservé comme preuve historique : **ne pas l'appliquer en plus**,
+  sinon doublon des tables. Seul le couple Drizzle + overlay est testé ici.
+- Workflow `J04 Drizzle isolated proof` : PostgreSQL 16 éphémère,
+  `pnpm install --frozen-lockfile`, `drizzle-kit check`, génération sans
+  dérive et test SQL. **Aucun déploiement ni lien Supabase.**
+
+## Limites bloquantes
+
+Les contraintes DML/trigger sont contournables par le propriétaire
+PostgreSQL ; les politiques RLS sont volontairement absentes, donc
+pas de GRANT applicatif. La future API NestJS doit authentifier
+l'utilisateur, recalculer les prix et valider BAT, rôles et
+autorisations sous transaction. Ni le code testé ici ni les tests
+PG ne prouvent la sécurité d'une application connectée.
+
+**NEXT :** approbation C1/C2 B–F, revue de sécurité et restauration
+sur base isolée ; aucun merge, migration Supabase ou Vercel sans GO distinct.
 
 [Roadmap Notion canonique](https://app.notion.com/p/41777c6633628195b96cdc442fae78ec)

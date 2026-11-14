@@ -8,14 +8,17 @@
     "start": "node dist/main.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint src --max-warnings=0",
-    "test": "node --import tsx --test src/*.spec.ts"
+    "test": "node --import tsx --test src/*.spec.ts",
+    "db:generate": "drizzle-kit generate --config drizzle.config.ts --name=j04_private_registry",
+    "db:check": "drizzle-kit check --config drizzle.config.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.0"
+    "rxjs": "^7.8.0",
+    "drizzle-orm": "0.45.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
@@ -23,6 +26,7 @@
     "eslint": "^9.0.0",
     "tsx": "^4.20.0",
     "typescript-eslint": "^8.0.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "drizzle-kit": "0.31.11"
   }
 }
