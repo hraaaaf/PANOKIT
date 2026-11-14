@@ -2,6 +2,15 @@
 set -euo pipefail
 : "${PGPASSWORD:?Only use isolated CI credentials}"
 export PGHOST="${PGHOST:-127.0.0.1}" PGPORT="${PGPORT:-5432}" PGUSER="${PGUSER:-postgres}" PGPASSWORD
+# Hard safety gate: this script creates/destroys a fixture DB. Never run
+# against Supabase, a developer's shared cluster or any non-CI endpoint.
+if [[ "${GITHUB_ACTIONS:-}" != "true" ||
+      "$PGHOST" != "127.0.0.1" ||
+      "$PGPORT" != "5432" ||
+      "$PGUSER" != "postgres" ]]; then
+  echo "REFUSED: isolated J04 fixture requires GitHub Actions local postgres:16" >&2
+  exit 1
+fi
 DB=panokit_j04_ci
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 psql -X -v ON_ERROR_STOP=1 -d postgres -c "CREATE DATABASE $DB"
