@@ -28,7 +28,7 @@ export const webOrders = privateSchema.table(
     sourceChannel: text("source_channel").notNull().default("PANOKIT_WEB"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [check("web_orders_origin_check", sql`"source_channel" = 'PANOKIT_WEB'`)],
+  () => [check("web_orders_origin_check", sql`"source_channel" = 'PANOKIT_WEB'`)],
 );
 
 export const provenanceRecords = privateSchema.table(
@@ -40,7 +40,7 @@ export const provenanceRecords = privateSchema.table(
     sourceChannel: text("source_channel").notNull().default("PANOKIT_WEB"),
     recordedAt: timestamp("recorded_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [check("provenance_origin_check", sql`"source_channel" = 'PANOKIT_WEB'`)],
+  () => [check("provenance_origin_check", sql`"source_channel" = 'PANOKIT_WEB'`)],
 );
 
 export const orderEvents = privateSchema.table(
@@ -53,7 +53,7 @@ export const orderEvents = privateSchema.table(
     eventName: text("event_name").notNull(),
     occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
+  () => [
     check("event_name_nonempty", sql`length(trim("event_name")) > 0`),
   ],
 );
